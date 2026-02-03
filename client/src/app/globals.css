@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --primary: #1a73e8;
+}
+
+.dark {
+  --background: #202124;
+  --foreground: #e8eaed;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
