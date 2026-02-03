@@ -1,12 +1,13 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import axios from "axios";
-import { ArrowLeft } from "lucide-react"; // ✅ आइकन इम्पोर्ट किया
+import api from "@/lib/axios"; // ✅ सेंट्रल API इंस्टेंस का उपयोग करें
+import { ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // ✅ अनहाइड स्टेट
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -17,10 +18,8 @@ export default function Login() {
     setError("");
 
     try {
-      const { data } = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        { email, password },
-      );
+      // ✅ एंडपॉइंट अब डायनामिक होगा (localhost की जगह live URL)
+      const { data } = await api.post("/api/auth/login", { email, password });
 
       localStorage.setItem("userInfo", JSON.stringify(data));
 
@@ -30,9 +29,7 @@ export default function Login() {
         router.replace("/hospital");
       }
     } catch (err) {
-      setError(
-        err.response?.data?.message || "Invalid credentials. Please try again.",
-      );
+      setError(err.response?.data?.message || "Invalid credentials.");
     } finally {
       setLoading(false);
     }
@@ -40,7 +37,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center px-4 relative">
-      {/* ✅ Back Button: Industrial Minimalist Design */}
       <button
         onClick={() => router.push("/")}
         className="absolute top-8 left-8 flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors group"
@@ -54,85 +50,69 @@ export default function Login() {
       </button>
 
       <div className="w-full max-w-md space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-slate-900 dark:bg-white rounded-2xl">
-            <span className="text-white dark:text-slate-900 text-xl font-light">
-              A
-            </span>
-          </div>
-          <div className="space-y-2">
-            <h1 className="text-3xl font-light text-slate-900 dark:text-white tracking-tight">
-              Archmed Pro
-            </h1>
-            <p className="text-sm text-slate-500">
-              Healthcare Management System
-            </p>
-          </div>
+        <div className="text-center space-y-2">
+          <h1 className="text-4xl font-medium tracking-tighter italic">
+            Archmed Pro
+          </h1>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-slate-400">
+            Node Authentication
+          </p>
         </div>
 
-        {/* Login Card */}
-        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 shadow-sm">
+        <div className="bg-white dark:bg-slate-900 border-[1.5px] border-black dark:border-slate-800 p-8 shadow-2xl">
           {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-900 rounded-xl">
-              <p className="text-sm text-red-600 dark:text-red-400 text-center">
-                {error}
-              </p>
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 text-[10px] font-black uppercase text-center">
+              {error}
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Email Address
+              <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                Network ID
               </label>
               <input
                 type="email"
-                autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@hospital.com"
-                className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 dark:focus:ring-white transition-shadow"
+                placeholder="node@archmed.com"
+                className="w-full p-4 border-[1.5px] border-black dark:border-slate-800 bg-transparent text-sm outline-none"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-medium text-slate-500 uppercase tracking-wider">
-                Password
+              <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                Security Key
               </label>
-              <input
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 dark:focus:ring-white transition-shadow"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"} // ✅ अनहाइड लॉजिक
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full p-4 border-[1.5px] border-black dark:border-slate-800 bg-transparent text-sm outline-none"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-black transition-colors"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-900 dark:bg-white hover:bg-slate-800 dark:hover:bg-slate-100 text-white dark:text-slate-900 py-3 rounded-xl text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-black dark:bg-white text-white dark:text-black py-5 text-[10px] font-black uppercase tracking-[0.4em] hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
             >
-              {loading ? "Authenticating..." : "Sign In"}
+              {loading && <Loader2 className="animate-spin" size={16} />}
+              {loading ? "Authenticating Node..." : "Initiate Login"}
             </button>
           </form>
-        </div>
-
-        {/* Footer */}
-        <div className="text-center">
-          <p className="text-sm text-slate-500">
-            Need to register a facility?{" "}
-            <a
-              href="/register"
-              className="text-slate-900 dark:text-white font-medium hover:underline"
-            >
-              Partner with us
-            </a>
-          </p>
         </div>
       </div>
     </div>
