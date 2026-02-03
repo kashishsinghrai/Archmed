@@ -17,7 +17,7 @@ const app = express();
 
 // 3. Updated CORS Middleware for Deployment
 // यहाँ अपनी सटीक Vercel URL डालें (बिना आखिरी '/')
-const allowedOrigins = ["https://archmed.vercel.app", "http://localhost:3000"];
+const allowedOrigins = ["https://archmed.vercel.app"];
 
 app.use(
   cors({
