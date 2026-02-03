@@ -15,14 +15,27 @@ connectDB();
 
 const app = express();
 
-// 3. Middleware (Must be at the top)
+// 3. Updated CORS Middleware for Deployment
+// यहाँ अपनी सटीक Vercel URL डालें (बिना आखिरी '/')
+const allowedOrigins = ["https://archmed.vercel.app", "http://localhost:3000"];
+
 app.use(
   cors({
-    origin: "http://localhost:3000",
-    credentials: true,
-  })
+    origin: function (origin, callback) {
+      // ऑरिजिन चेक करें या बिना ऑरिजिन वाली रिक्वेस्ट (जैसे Postman) को अनुमति दें
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(
+          new Error("CORS Policy Violation: Access Denied by Archmed Protocol"),
+        );
+      }
+    },
+    credentials: true, // टोकन और कुकीज़ को सिंक करने के लिए अनिवार्य
+  }),
 );
-app.use(express.json()); // यह लाइन डेटा (req.body) पढ़ने के लिए सबसे जरूरी है
+
+app.use(express.json()); // डेटा (req.body) पढ़ने के लिए आवश्यक
 
 // 4. Use Routes
 app.use("/api/auth", authRoutes);
